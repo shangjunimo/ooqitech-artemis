@@ -1,0 +1,133 @@
+<html>
+  <head>
+  <link rel="stylesheet" href="/static/layuiadmin/layui/css/layui.css">
+  </head>
+  <body>
+          <div class="layui-form layui-layer-content" id="edit-project-ifame" style="margin: 40px 30px 20px 50px;" >
+            <div class="layui-form-item" >
+              <label class="layui-form-label">项目名称</label>
+              <div class="layui-input-inline">
+                <input type="text" name="app_name" lay-verify="required" value="{{ app_name }}" readonly="" autocomplete="off" class="layui-input">
+              </div>
+            </div>
+            <div class="layui-form-item">
+              <label class="layui-form-label">中文名称</label>
+              <div class="layui-input-inline">
+                <input type="text" name="c_name" lay-verify="required" value="{{ chinese_name }}" autocomplete="off" class="layui-input">
+              </div>
+            </div>
+            <div {% if sre_env == "False" %} class="layui-form-item layui-hide" {% else %} class="layui-form-item" {% endif %}>
+              <label class="layui-form-label" >cat名称</label>
+              <div class="layui-input-inline">
+                <input type="text" name="catname" {% if sre_env == "True" %} lay-verify="required" {% endif %} value="{{ catName }}" autocomplete="off" class="layui-input">
+              </div>
+            </div>
+            <div {% if sre_env == "False" %} class="layui-form-item layui-hide" {% else %} class="layui-form-item" {% endif %}>
+              <label class="layui-form-label">elk名称</label>
+              <div class="layui-input-inline">
+                <input type="text" name="elkname" {% if sre_env == "True" %} lay-verify="required" {% endif %} value="{{ elkName }}" autocomplete="off" class="layui-input">
+              </div>
+            </div>
+            <div {% if sre_env == "False" %} class="layui-form-item layui-hide" {% else %} class="layui-form-item" {% endif %}>
+              <label class="layui-form-label">业务组</label>
+                <div class="layui-input-block" style="width: 47%">
+                <select name="business" lay-search>
+                <option value="default" selected></option>
+                    {% for id, name in bussiness.items %}
+                  <option value="{{ id }}" name="{{ name }}" {% if id == businessId %} selected {% endif %}>{{ name }} </option>
+                    {% endfor %}
+                </select>
+                </div>
+            </div>
+            <div {% if sre_env == "False" %} class="layui-form-item layui-hide" {% else %} class="layui-form-item" {% endif %}>
+              <label class="layui-form-label">负责人A</label>
+                <div class="layui-input-block" style="width: 47%">
+                <select name="owner_a" lay-search>
+                <option value="default" selected></option>
+                    {% for id, name in  employee.items %}
+                  <option value="{{ id }}" name="{{ name }}" {% if id == employeeMasterId %} selected {% endif %}>{{ name }}</option>
+                    {% endfor %}
+                </select>
+                </div>
+            </div>
+            <div {% if sre_env == "False" %} class="layui-form-item layui-hide" {% else %} class="layui-form-item" {% endif %}>
+              <label class="layui-form-label">负责人B</label>
+                <div class="layui-input-block" style="width: 47%">
+                <select name="owner_b" lay-search>
+                <option value="default" selected></option>
+                    {% for id, name in  employee.items %}
+                  <option value="{{ id }}" name="{{ name }}" {% if id == employeeSlaveId %} selected {% endif %}>{{ name }}</option>
+                    {% endfor %}
+                </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+              <label class="layui-form-label">所属部门</label>
+                <div class="layui-input-block" style="width: 45%">
+                <select name="role_name">
+                    {% for name, id in  role.items %}
+                  <option value="{{ name }}" name="{{ name }}" {% if name == role_name %} selected {% endif %}>{{ name }} </option>
+                    {% endfor %}
+                </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+              <label class="layui-form-label">开发部门</label>
+                <div class="layui-input-block" style="width: 45%">
+                <select name="dev_group">
+                    {% for name, id in  role.items %}
+                  <option value="{{ name }}" name="{{ name }}" {% if name == dev_group %} selected {% endif %}>{{ name }} </option>
+                    {% endfor %}
+                </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+              <label class="layui-form-label">测试部门</label>
+                <div class="layui-input-block" style="width: 45%">
+                <select name="test_group">
+                    {% for name, id in  role.items %}
+                  <option value="{{ name }}" name="{{ name }}" {% if name == test_group %} selected {% endif %}>{{ name }} </option>
+                    {% endfor %}
+                </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+              <label class="layui-form-label">状&nbsp;&nbsp;&nbsp;&nbsp;态</label>
+              <div class="layui-input-inline">
+                <input type="text" name="status" lay-verify="required" value="{{ status }}" autocomplete="off" class="layui-input">
+              </div>
+            </div>
+            <div class="layui-form-item">
+              <label class="layui-form-label">ROOT.war</label>
+              <div class="layui-input-block">
+                  <input type="radio" name="wartype" value="1" title="是" {% if is_root == 1 %}checked {% endif %}>
+                  <input type="radio" name="wartype" value="0" title="否" {% if is_root == 0 %}checked {% endif %}>
+              </div>
+            </div>
+            <div class="layui-form-item layui-form-text">
+              <label class="layui-form-label">项目描述</label>
+              <div class="layui-input-block">
+                <textarea name="desc" placeholder="请输入内容" class="layui-textarea"  style="width: 250px"></textarea>
+              </div>
+            </div>
+            <div class="layui-form-item layui-hide">
+                <input type="text" name="sre_env" value="{{ sre_env }}" readonly="" class="layui-input">
+                <button class="layui-btn" lay-submit lay-filter="project-edit-submit" id="project-edit-submit">提交</button>
+            </div>
+          </div>
+</body>
+<style>
+</style>
+    <script src="/static/layuiadmin/layui/layui.js"></script>
+  <script>
+  layui.config({
+    base: '/static/layuiadmin/' //静态资源所在路径
+  }).extend({
+    index: 'lib/index' //主入口模块
+  }).use(['index', 'form'], function(){
+    var $ = layui.$
+    ,form = layui.form ;
+  })
+  </script>
+</html>
+

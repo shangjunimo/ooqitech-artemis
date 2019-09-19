@@ -1,0 +1,151 @@
+{% extends 'base/base.html' %}
+{% block title %}
+    权限组列表
+{% endblock %}
+
+{% block content %}
+    <div class="layui-body" style="background-color: #f2f2f2;">
+    <div class="layui-fluid">
+  <div class="layui-row layui-col-space15">
+    <div class="layui-col-md12">
+      <div class="layui-card">
+        <div class="layui-card-header">权限组列表</div>
+<div class="layui-card-body">
+
+            <div class="table-reload-btn" style="margin-bottom: 10px;">
+              <button class="layui-btn layuiadmin-btn-admin" data-type="add_rolegroup" id="add_rolegroup_btn">添加权限组</button>
+
+            </div>
+            <table class="layui-hide" id="rolegroup_table" lay-filter="rolegroup_table"></table>
+          </div>
+      </div>
+    </div>
+  </div>
+    </div>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+<script type="text/html" id="rolegroupbar">
+  <a class="layui-btn layui-btn-radius layui-btn-danger layui-btn-xs" lay-event="del"><i class="layui-icon layui-icon-delete">删除</i></a>
+</script>
+<script>
+layui.use('table', function(){
+  var table = layui.table;
+
+  table.render({
+    elem: '#rolegroup_table'
+    ,method: 'POST'
+    ,url: '/user/rolegroup/' //数据接口
+    ,page: true //开启分页
+    ,limit: 10
+    ,request: {
+        pageName: 'curr'
+      }
+    ,cols: [[ //表头
+      {field: 'id', title: 'ID', align:'center',sort: true, fixed: 'left'}
+      ,{field: 'title', title: '权限组名', align:'center'}
+      ,{fixed: 'right', title: '操作',align:'center', toolbar: '#rolegroupbar'}
+    ]]
+    ,parseData: function (res) {
+        return {
+            "code": res.status,
+            "msg": res.message,
+            "count": res.total,
+            "data": res.data.item
+        };
+      }
+  });
+
+  table.on('tool(rolegroup_table)', function(obj){ //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+          var data = obj.data; //获得当前行数据
+          console.log(data);
+          var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+          var tr = obj.tr; //获得当前行 tr 的DOM对象
+
+          if(layEvent === 'del'){ //删除
+            layer.confirm('您真的要删除 <strong>' + data.title + '</strong> 么?',{icon:3, title:'提示信息'}, function(index){
+              layer.close(index);
+              //向服务端发送删除指令
+               $.ajax({
+                    url: "/user/rolegroupdel/",
+                    type: 'post',
+                    data: {id: data.id},
+                }).done(function(res){
+                    if(res.code===0){
+                        obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
+                        layer.msg(res.msg,{icon:1});
+                    }else{
+                        layer.msg(res.msg,{icon:4,time:3000});
+                    }
+                })
+            });
+          }
+        });
+
+});
+
+
+layui.config({
+    base: '/static/' //静态资源所在路径
+      ,debug: false
+  }).extend({
+    index: 'lib/index' //主入口模块
+  }).use(['index', 'useradmin', 'form', 'table'], function () {
+    var $ = layui.$,
+     admin = layui.admin,
+     table = layui.table,
+     form = layui.form;
+
+    var active = {
+        "add_rolegroup": function () {
+            layer.open({
+            type: 2,
+            title: ['添加权限组'],
+            area: ['500px', '230px'],
+            content: '/user/rolegroupadd/',
+            btn: ['确定', '取消'],
+            btnAlign: 'c',
+            yes: function (index, layero) {
+                var iframeWindow = window['layui-layer-iframe'+ index]
+                ,submit = layero.find('iframe').contents().find('#add-rolegroup-submit');
+                //console.log(" add user submit", iframeWindow);
+                //监听提交
+                iframeWindow.layui.form.on('submit(add-rolegroup-submit)', function(data){
+                    var field = data.field; //获取提交的字段
+                    //提交 Ajax 成功后，静态更新表格中的数据
+                    console.log('start ajax');
+                       $.ajax({
+                            url: "/user/rolegroupadd/",
+                            type: 'post',
+                            data: field,
+                        }).done(function (res) {
+                            if(res.code===0){
+                                  layer.close(index);
+                                  layer.msg(res.msg,{icon:1, time:2000}, function () {
+                                      location.reload();
+                                  });
+                              }else{
+                                  layer.msg(res.msg,{icon:5},function(){
+                                    return;
+                                  });
+                              }
+                       });
+                  table.reload('rolegroup_table'); //数据刷新
+                  //layer.close(index); //关闭弹层
+            });
+            submit.trigger('click');
+            }
+        })
+        }
+    };
+
+    $('.layui-btn.layuiadmin-btn-admin').on('click', function(){
+      var type = $(this).data('type');
+      active[type] ? active[type].call(this) : '';
+    });
+
+});
+</script>
+{% endblock %}

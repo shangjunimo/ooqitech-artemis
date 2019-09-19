@@ -1,0 +1,70 @@
+{% extends 'base/base.html' %}
+{% block title %}
+    仓库同步监控
+{% endblock %}
+
+{% block content %}
+    <div class="layui-body" style="background-color: #f2f2f2;">
+    <div class="layui-fluid">
+  <div class="layui-row layui-col-space15">
+    <div class="layui-col-md12">
+      <div class="layui-card">
+        <div class="layui-card-header">仓库同步监控</div>
+<div class="layui-card-body">
+
+            <table class="layui-hide" id="repo_monitor_table" lay-filter="repo_monitor_table"></table>
+          </div>
+      </div>
+    </div>
+  </div>
+    </div>
+    </div>
+
+{% endblock %}
+{% block script %}
+<script>
+
+
+
+layui.use(['table', 'laytpl'], function(){
+  var table = layui.table
+  ,laytpl = layui.laytpl;
+
+  table.render({
+    elem: '#repo_monitor_table'
+    ,method: 'POST'
+    ,url: '/repertory/mirrorss/sync/batchlist' //数据接口
+    ,page: true //开启分页
+    ,limit: 10
+    ,request: {
+        pageName: 'curr'
+      }
+    ,cols: [[ //表头
+      {field: 'excute_uuid', title: '同步任务号', align:'center', sort: true, fixed: 'left'}
+      ,{field: 'job_count', title: '同步任务总数', align:'center'}
+      ,{field: 'change_jobs', title: '同步任务成功数', align:'center'}
+      ,{field: 'start_time', title: '开始同步时间', align:'center'}
+      ,{field: 'end_time', title: '结束同步时间',align:'center'}
+    ]]
+    ,parseData: function (res) {
+        return {
+            "code": res.status,
+            "msg": res.message,
+            "count": res.total,
+            "data": res.data.item
+        };
+      }
+  });
+  laytpl.config({
+      open: '<%',
+      close: '%>'
+  });
+
+});
+
+
+
+
+
+</script>
+{% endblock %}

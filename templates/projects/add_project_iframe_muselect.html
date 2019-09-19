@@ -1,0 +1,140 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="/static/layuiadmin/layui/css/layui.css">
+      <link href="/static/js/plugins/multiselect/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">
+  </head>
+  <body>
+     <div class="layui-form" id="add-project-ifame" style="margin: 40px 30px 20px 50px">
+            <div class="layui-form-item" >
+              <label class="layui-form-label">项目名称</label>
+              <div class="layui-input-inline">
+                <input type="text" name="app_name" lay-verify="required" class="layui-input">
+              </div>
+            </div>
+
+
+            <div class="layui-form-item">
+              <label class="layui-form-label">ROOT</label>
+              <div class="layui-input-block">
+                  <input type="radio" name="wartype" value="0" title="是">
+                  <input type="radio" name="wartype" value="1" title="否" checked>
+              </div>
+            </div>
+            <div class="layui-form-item layui-form-text">
+              <label class="layui-form-label">项目描述</label>
+              <div class="layui-input-block">
+                <textarea name="desc" placeholder="请输入内容" class="layui-textarea" style="width: 250px"></textarea>
+              </div>
+            </div>
+            <div class="layui-form-item layui-form-text ">
+
+                <label class="layui-form-label">关联IP</label>
+                <div class="layui-input-block">
+                      <select multiple="multiple" id="mu-select" name="mu-select[]">
+                      <input type="hidden" id="ipaddr" name="ip" />
+            </select>
+                </div>
+            </div>
+            <div class="layui-form-item layui-hide">
+                <button class="layui-btn" lay-submit lay-filter="project-add-submit" id="project-add-submit">提交</button>
+            </div>
+          </div>
+</body>
+<style>
+    .layui-input-block .layui-form-select {
+        display: none !important;
+    }
+    .custom-header {
+        text-align: center;
+        padding: 2px;
+        background-color: #96b97d;
+        color: #000;
+    }
+</style>
+    <script src="/static/layuiadmin/layui/layui.js"></script>
+      <script src="/static/js/jquery-1.8.3.min.js"></script>
+    <script src="/static/js/plugins/multiselect/js/jquery.multi-select.js" type="text/javascript"></script>
+  <script>
+  layui.config({
+    base: '/static/layuiadmin/' //静态资源所在路径
+  }).extend({
+    index: 'lib/index' //主入口模块
+  }).use(['index', 'form'], function(){
+    var $ = layui.$
+    ,form = layui.form ;
+
+  });
+
+  var selected = [];
+
+  //$("#mu-select").html("").append("<option value=''>"+'IP列表'+"</option>").append("<option value='1'>"+'暂无IP'+"</option>");
+  $.ajax({
+      type: "POST",
+      url: '/projects/ip/',
+      success: function (res) {
+          //console.log(res.ips);
+          var ips = res.ips;
+          ips.forEach(function (ip) {
+              //console.log(ip);
+              var opt = $('<option />', {
+                  value: ip,
+                  text: ip
+              });
+            opt.appendTo($("#mu-select"));
+          });
+          $('#mu-select').multiSelect('refresh');
+      }
+  });
+
+  $('#mu-select').multiSelect({
+            selectableHeader: "<div class='custom-header'>可用IP列表</div>",
+            selectionHeader: "<div class='custom-header'>已选择IP列表</div>",
+
+			isOpen:false,
+			multiple : true,
+			header : true,
+			selectedList : 10,// 预设值最多显示10被选中项
+			hide : [ "explode", 500 ],
+			noneSelectedText : ['IP列表'],
+			close : function() {
+				var val = $("#mu-select").val();
+				$("#ipaddr").val(val);
+            },
+            afterSelect: function(values){
+                selected.push(values);
+                //console.log(selected);
+              },
+            afterDeselect: function(values) {
+                selected.splice(values);
+                //console.log(selected);
+            },
+            Change: function(element, checked) {
+            var brands = $('#mu-select option:selected');
+            var selected = [];
+            $(brands).each(function(index, brand){
+                selected.push([$(this).val()]);
+            });
+
+            console.log(selected);
+    }
+
+  });
+
+$('#mu-select').change(function(){
+    var meals = $(this).val();
+    console.log(typeof (meals));
+    if (meals !== null) {
+        var selectedmeals = meals.join(", ");
+    }
+    console.log(selectedmeals);
+    var arr =  $("#mu-select").val();
+    console.log('bb', $('select[name="mu-select[]"]').val());
+
+    $('input[name="ip"]').val(arr);
+
+
+
+})
+
+  </script>
+</html>

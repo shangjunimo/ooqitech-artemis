@@ -1,0 +1,88 @@
+{% extends 'base/base.html' %}
+{% block title %}
+    用户资料编辑
+{% endblock %}
+
+{% block content %}
+    <div class="layui-body" style="background-color: #f2f2f2;">
+    <div class="layui-fluid">
+  <div class="layui-row layui-col-space15">
+    <div class="layui-col-md12">
+      <div class="layui-card">
+        <div class="layui-card-header">设置我的资料</div>
+        <div class="layui-card-body" pad15="">
+
+          <div class="layui-form" lay-filter="">
+            <div class="layui-form-item">
+              <label class="layui-form-label">用户名</label>
+              <div class="layui-input-inline">
+                <input type="text" name="username" value="{{ user }}" readonly="" class="layui-input">
+              </div>
+            </div>
+            <div class="layui-form-item">
+              <label class="layui-form-label">手机</label>
+              <div class="layui-input-inline">
+                <input type="text" id="phone" name="cellphone" value="" lay-verify="phone" autocomplete="off" class="layui-input">
+              </div>
+            </div>
+            <div class="layui-form-item">
+              <label class="layui-form-label">邮箱</label>
+              <div class="layui-input-inline">
+                <input type="text" id="email" name="email" value="" lay-verify="email" autocomplete="off" class="layui-input">
+              </div>
+            </div>
+            <div class="layui-form-item">
+              <div class="layui-input-block">
+                <button class="layui-btn" lay-submit="" lay-filter="edit-userinfo-btn">确认修改</button>
+                <button type="reset" class="layui-btn layui-btn-primary" lay-submit="" lay-filter="userinfo-reset-btn">重置</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+    </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+<script>
+  layui.use('form', function () {
+     form = layui.form;
+
+     form.on('submit(edit-userinfo-btn)', function(obj) {
+         object_info = obj.field;
+          $.ajax({
+              url: "/user/info/",
+              type: 'post',
+              data: object_info,
+          }).done(function (res) {
+              console.log(res);
+              if(res.code===500) {
+                  layer.msg(res.msg, {'icon': 5});
+                  console.log('error')
+              } else {
+                  console.log('succ');
+                  layer.msg(res.msg, {'icon': 1},
+                      function () {
+                        $("#phone").val("");
+                        $("#email").val("");
+                  }
+                  );
+              }
+          })
+
+     });
+
+
+     form.on('submit(userinfo-reset-btn)', function(obj) {
+        $("#phone").val("");
+        $("#email").val("");
+     });
+
+ });
+
+</script>
+{% endblock %}

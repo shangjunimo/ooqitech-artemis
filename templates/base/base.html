@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+      {% block title %}
+      {% endblock %}
+  </title>
+  <link rel="stylesheet" href="/static/layui/css/layui.css">
+  <link rel="stylesheet" href="/static/style/admin.css" media="all">
+  <link rel="icon" href="/static/favicon.ico" type="image/gif">
+</head>
+<body layadmin-themealias="green" class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+  <div class="layui-header">
+    <ul class="layui-nav layui-layout-right">
+      <li class="layui-nav-item">
+        <a href="javascript:;">
+          <img src="http://t.cn/RCzsdCq" class="layui-nav-img">
+          {{ user | capfirst }}
+        </a>
+        <dl class="layui-nav-child">
+          <dd><a href="/user/info">基本资料</a></dd>
+          <dd><a href="/user/passwd">安全设置</a></dd>
+          <dd><a href="/user/logout/">退出</a></dd>
+        </dl>
+      </li>
+    </ul>
+  </div>
+<div class="layui-logo" lay-href="" style="background-color: #1E9FFF !important;"> <span>应用管理系统</span> </div>
+  <div class="layui-side layui-side-menu">
+    <div class="layui-side-scroll">
+      <ul class="layui-nav layui-nav-tree"  lay-filter="test" lay-shrink="all">
+        <li class="layui-nav-item layui-nav-itemed" id="index">
+          <a class="" href="/">Dashboard</a>
+        </li>
+        <li class="layui-nav-item" id="projects">
+          <a href="javascript:;">项目管理</a>
+          <dl class="layui-nav-child">
+            <dd class="list layui-nav-child-oo"><a href="{% url 'projects:project_list' %}">项目列表</a></dd>
+          </dl>
+        </li>
+        <li class="layui-nav-item" id="repertory">
+           <a href="javascript:;">repo管理</a>
+          <dl class="layui-nav-child">
+            <dd class="mirror layui-nav-child-oo"><a href="{% url 'repertory:mirrorapp' %}">仓库列表</a></dd>
+            <dd class="mirrorss layui-nav-child-oo"><a href="{% url 'repertory:mirrorsynclist' %}">任务监控</a></dd>
+          </dl>
+        </li>
+        <li class="layui-nav-item" id="user">
+            <a href="javascript:;">用户权限</a>
+            <dl class="layui-nav-child">
+            <dd class="info layui-nav-child-oo"><a href="{% url 'user:info' %}">基本资料</a></dd>
+            <dd class="passwd layui-nav-child-oo"><a href="{% url 'user:passwd' %}">修改密码</a></dd>
+            <dd class="manager layui-nav-child-oo"><a href="{% url 'user:manager' %}">用户管理</a></dd>
+            <dd class="dept layui-nav-child-oo"><a href="{% url 'user:dept' %}">部门管理</a></dd>
+            <dd class="role layui-nav-child-oo"><a href="{% url 'user:role' %}">权限管理</a></dd>
+            <dd class="rolegroup layui-nav-child-oo"><a href="{% url 'user:rolegroup' %}">权限组管理</a></dd>
+          </dl>
+        </li>
+      </ul>
+    </div>
+  </div>
+{% block content %}
+{% endblock %}
+
+
+</div>
+<style>
+    .layui-nav-child-oo {
+        margin-left: 15px;
+    }
+</style>
+<script src="/static/layui/layui.js"></script>
+<script src="/static/js/jquery-1.8.3.min.js"></script>
+<script>
+
+    layui.use('element', function(){
+      var element = layui.element;
+
+    });
+
+
+    var url_array = document.location.pathname.split("/");
+    s1 = url_array[1];
+    s2 = url_array[2];
+    if (s1 == ''){
+        $('#index').addClass('layui-this')
+    }  else if (s2 == ''){
+        $("#"+s1).addClass('layui-this');
+    } else {
+        $("#"+s1).addClass('layui-nav-itemed');
+        $('#'+s1+' .'+s2).addClass('layui-this');
+    }
+
+</script>
+{% block script %}
+{% endblock %}
+</body>
+{% block iframe %}
+{% endblock %}
+
+{% block model_body %}
+{% endblock %}
+</html>

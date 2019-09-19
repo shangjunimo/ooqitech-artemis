@@ -1,0 +1,56 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="/static/layuiadmin/layui/css/layui.css">
+  </head>
+  <body>
+          <div class="layui-form" id="edit-role-ifame" style="margin: 40px 30px 20px 50px">
+            <div class="layui-form-item" >
+              <label class="layui-form-label">权限名</label>
+              <div class="layui-input-inline">
+                <input type="text" name="title" lay-verify="required" readonly="" readonly="" value="{{ title }}" class="layui-input">
+              </div>
+            </div>
+            <div class="layui-form-item">
+              <label class="layui-form-label">U&nbsp;R&nbsp;&nbsp;L</label>
+              <div class="layui-input-inline">
+                <input type="text" name="url" lay-verify="pass" autocomplete="off" value="{{ url }}" class="layui-input">
+              </div>
+            </div>
+            <div class="layui-form-item">
+              <label class="layui-form-label">动&nbsp;&nbsp;&nbsp;作</label>
+              <div class="layui-input-inline">
+                <input type="text" name="action" lay-verify="required" autocomplete="off" value="{{ action }}" class="layui-input">
+              </div>
+            </div>
+            <div class="layui-form-item">
+              <label class="layui-form-label">权限组</label>
+              <div class="layui-input-block" style="width: 45%">
+                <select name="permissiongroupname">
+                    {% for name, id in  all_permission.items %}
+                  <option value="{{ name }}" name="{{ name }}" {% if name == permission_group %} selected {% endif %}>{{ name }} </option>
+                    {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="layui-form-item layui-hide">
+                <button class="layui-btn" lay-submit lay-filter="edit-role-submit" id="edit-role-submit">提交</button>
+            </div>
+            <!--div class="layui-form-item">
+              <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal layui-text-center" id="user-edit-submit" lay-submit="" lay-filter="user-edit-submit" style="margin-left: 70px">确认</button>
+              </div>
+            </div-->
+          </div>
+</body>
+  <script src="/static/layuiadmin/layui/layui.js"></script>
+  <script>
+  layui.config({
+    base: '/static/layuiadmin/' //静态资源所在路径
+  }).extend({
+    index: 'lib/index' //主入口模块
+  }).use(['index', 'form'], function(){
+    var $ = layui.$
+    ,form = layui.form ;
+  })
+  </script>
+</html>

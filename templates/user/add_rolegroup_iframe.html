@@ -1,0 +1,30 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="/static/layuiadmin/layui/css/layui.css" media="all">
+  </head>
+  <body>
+          <div class="layui-form" id="add-rolegroup-ifame" style="margin: 40px 30px 20px 50px">
+           <div class="layui-form-item" >
+              <label class="layui-form-label">权限组名</label>
+              <div class="layui-input-inline">
+                <input type="text" name="rolegroupname" lay-verify="required" autocomplete="off" class="layui-input">
+              </div>
+            </div>
+            <div class="layui-form-item layui-hide">
+                <button class="layui-btn" lay-submit lay-filter="add-rolegroup-submit" id="add-rolegroup-submit">提交</button>
+            </div>
+          </div>
+    </body>
+  <script src="/static/layuiadmin/layui/layui.js"></script>
+  <script>
+  layui.config({
+    base: '/static/layuiadmin/' //静态资源所在路径
+  }).extend({
+    index: 'lib/index' //主入口模块
+  }).use(['index', 'form'], function(){
+    var $ = layui.$
+    ,form = layui.form ;
+
+  })
+  </script>
+</html>

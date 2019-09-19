@@ -1,0 +1,104 @@
+{% extends 'base/base.html' %}
+{% block title %}
+    修改密码
+{% endblock %}
+
+{% block content %}
+    <div class="layui-body" style="background-color: #f2f2f2;">
+    <div class="layui-fluid">
+  <div class="layui-row layui-col-space15">
+    <div class="layui-col-md12">
+      <div class="layui-card">
+        <div class="layui-card-header">修改密码</div>
+        <div class="layui-card-body">
+
+          <div class="layui-form" lay-filter="" id="pass-form">
+            <div class="layui-form-item">
+              <label class="layui-form-label">原始密码</label>
+              <div class="layui-input-inline">
+                <input type="password" name="old_passwd" value="" lay-verify="pass" class="layui-input">
+              </div>
+            </div>
+            <div class="layui-form-item">
+              <label class="layui-form-label">新密码</label>
+              <div class="layui-input-inline">
+                <input type="password" name="passwd" value="" lay-verify="pass" autocomplete="off" class="layui-input">
+              </div>
+            </div>
+            <div class="layui-form-item">
+              <label class="layui-form-label">确认密码</label>
+              <div class="layui-input-inline">
+                <input type="password" name="passwd_re" value="" lay-verify="pass|confirmPwd" autocomplete="off" class="layui-input">
+              </div>
+            </div>
+            <div class="layui-form-item">
+              <div class="layui-input-block">
+                <button class="layui-btn" lay-submit="" lay-filter="changpass-submit">确认修改</button>
+                <button class="layui-btn layui-btn-primary" lay-submit=""  class="layui-btn layui-btn-primary" lay-filter="changpass-reset-btn">重置</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+    </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+<script>
+ layui.use('form', function () {
+     form = layui.form;
+
+     form.verify({
+        pass: [
+        /^[\S]{6,12}$/
+        ,'密码必须6到12位，且不能出现空格'
+      ],
+
+
+     });
+
+
+
+     form.on('submit(changpass-submit)', function(obj) {
+         let object_info = obj.field;
+          if(object_info.passwd !== object_info.passwd_re){
+            return layer.msg('两次密码输入不一致');
+          };
+
+          if(object_info.old_passwd === object_info.passwd_re){
+            return layer.msg('新老密码不能一致');
+          };
+          $.ajax({
+              url: "/user/passwd/",
+              type: 'post',
+              data: object_info,
+          }).done(function (res) {
+              console.log(res);
+              if(res.code===500) {
+                  layer.msg(res.msg, {'icon': 5});
+                  console.log('error')
+              } else {
+                  console.log('succ');
+                  layer.msg(res.msg, {'icon': 1},
+                      function () {
+                      $("input").val("")
+                  }
+                  );
+              }
+          })
+
+     });
+
+
+     form.on('submit(changpass-reset-btn)', function(obj) {
+        $("input").val("");
+     });
+
+ });
+
+</script>
+{% endblock %}

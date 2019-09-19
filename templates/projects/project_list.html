@@ -1,0 +1,297 @@
+{% extends 'base/base.html' %}
+{% block title %}
+    项目列表
+{% endblock %}
+
+{% block content %}
+    <div class="layui-body" style="background-color: #f2f2f2;">
+    <div class="layui-fluid">
+  <div class="layui-row layui-col-space15">
+    <div class="layui-col-md12">
+      <div class="layui-card">
+        <div class="layui-card-header">项目列表</div>
+<div class="layui-card-body">
+
+            <div class="table-reload-btn" style="margin-bottom: 10px;">
+              搜索项目：
+              <div class="layui-inline">
+                <input class="layui-input" name="project_name" id="project_table_reload" autocomplete="off">
+              </div>
+              <button class="layui-btn" data-type="reload" id="reload">搜索</button>
+
+            </div>
+                <button class="layui-btn layui-btn-normal layui-layout-right" data-type="add_project" id="add_project" style="margin-right: 15px;margin-top: 10px;"><i class="layui-icon">&#xe608;</i>增加项目</button>
+
+
+            <table class="layui-hide" id="project_table" lay-filter="project_table"></table>
+          </div>
+      </div>
+    </div>
+  </div>
+    </div>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+{% verbatim %}
+<script type="text/html" id="probar">
+    {{#  if( d.user == "admin"){ }}
+    <a class="layui-btn layui-btn-radius layui-btn-normal layui-btn-xs" lay-event="edit"><i class="layui-icon layui-icon-edit">编辑</i></a>
+    <a class="layui-btn layui-btn-radius layui-btn-danger layui-btn-xs project-delete" lay-event="del"><i class="layui-icon layui-icon-delete">删除</i></a>
+    {{#  } else { }}
+    <a class="layui-btn layui-btn-radius layui-btn-xs layui-btn-disabled" disabled="disabled"><i class="layui-icon layui-icon-edit">编辑</i></a>
+    <a class="layui-btn layui-btn-radius layui-btn-xs layui-btn-disabled" disabled="disabled"><i class="layui-icon layui-icon-delete">删除</i></a>
+    {{#  } }}
+</script>
+{% endverbatim %}
+<script>
+layui.use('table', function(){
+  var table = layui.table;
+
+  table.render({
+    elem: '#project_table'
+    ,method: 'POST'
+    ,url: '/projects/list/' //数据接口
+    ,page: true //开启分页
+    ,limit: 10
+    ,request: {
+        pageName: 'curr'
+      }
+    ,cols: [[ //表头
+      {field: 'id', title: 'ID', align:'center', sort: true, fixed: 'left'}
+      ,{field: 'app_name', title: '项目名', align:'center'}
+      ,{field: 'chinese_name', title: '项目中文名', align:'center'}
+      ,{field: 'role_name', title: '部门', align:'center'}
+      ,{field: 'dev_group', title: '开发部门', align:'center'}
+      ,{field: 'project_type', title: '项目类型',width:100, align:'center'}
+      ,{field: 'status', title: '状态', width:70, align:'center'}
+      ,{field: 'create_time', title: '创建时间',  align:'center'}
+      ,{field: 'update_time', title: '更新时间', align:'center'}
+      ,{fixed: 'right', title: '操作', width:150, align:'center', toolbar: '#probar'}
+    ]]
+    ,parseData: function (res) {
+        return {
+            "code": res.status,
+            "msg": res.message,
+            "count": res.total,
+            "data": res.data.item
+        };
+      }
+  });
+
+  table.on('tool(project_table)', function(obj){ //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+          var data = obj.data; //获得当前行数据
+          console.log(data);
+          var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+          var tr = obj.tr; //获得当前行 tr 的DOM对象
+
+          if(layEvent === 'del'){ //删除
+            layer.confirm('您真的要删除项目 <strong>' + data.app_name + '</strong> 么?',{icon:3, title:'提示信息'}, function(index){
+              layer.close(index);
+              //向服务端发送删除指令
+               $.ajax({
+                    url: "/projects/del/",
+                    type: 'post',
+                    data: {id: data.id, app_name: data.app_name},
+                }).done(function(res){
+                    if(res.code===0){
+                        obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
+                        layer.msg(res.msg,{icon:1, offset:100});
+                    }else{
+                        layer.msg(res.msg,{icon:5, offset: 100});
+                        return;
+                    }
+                })
+            });
+          } else if(layEvent === 'edit'){ //编辑
+            //edit(data.id);
+                  layer.open({
+                    type: 2,
+                    title: ['编辑项目'],
+                    area: ['500px', '650px'],
+                    content: '/projects/search/?id=' + data.id + '&app_name=' + data.app_name,
+                    btn: ['确定', '取消'],
+                    btnAlign: 'c',
+                    yes: function (index, layero) {
+                    var iframeWindow = window['layui-layer-iframe'+ index]
+                    ,submit = layero.find('iframe').contents().find('#project-edit-submit');
+                    //console.log(" add user submit", iframeWindow);
+                    //监听提交
+                    iframeWindow.layui.form.on('submit(project-edit-submit)', function(data){
+                       var field = data.field; //获取提交的字段
+                        //提交 Ajax 成功后，静态更新表格中的数据
+                       var msg_obj = {
+                            'business': '业务组不能为空',
+                            'owner_a': '负责人A不能为空',
+                            'owner_b': '负责人B不能为空',
+                            'role_name': '所属部门不能为空',
+                            'dev_group': '开发部门不能为空',
+                            'test_group': '测试部门不能为空',
+                        };
+
+                        for (i in msg_obj) {
+                            if (field[i] === "default" && field.sre_env === "True") {
+                                //console.log(msg_obj[i]);
+                                layer.msg(msg_obj[i],{icon: 5, offset: 100});
+                                return;
+                            }
+                        }
+                        console.log('start ajax');
+                          $.ajax({
+                              url: "/projects/edit/",
+                              type: 'post',
+                              data: field,
+                          }).done(function(res){
+                              if(res.code===0){
+                                  console.log(res.code);
+                                  layer.close(index);
+                                  layer.msg(res.msg,{icon:1, time:3000, offset: 100},function(){
+                                    table.reload('project_table');
+                                  });
+                              }else{
+                                  layer.msg(res.msg,{icon:5, offset: 100});
+                                  return;
+                              }
+                          });
+
+                      //layer.close(index); //关闭弹层
+                });
+                submit.trigger('click');
+                }
+              });
+                /*
+               $.ajax({
+                    url: "/projects/search/",
+                    //type: 'get',
+                    data: {app_id: data.app_id},
+                }).done(function (str) {
+                   console.log('str' + str);
+                   layer.open({
+                       type: 2,
+                       title: ['编辑项目'],
+                       area: ['500px', '600px'],
+                       content: str.replace('"', '')
+                   });
+               });
+               */
+          }
+        });
+
+
+
+  var $ = layui.$, active = {
+      reload: function(){
+        var project_name = $('#project_table_reload').val();
+
+        //执行重载
+        table.reload('project_table', {
+          url: '/projects/search/'
+          ,method: 'post'
+          ,page: {
+            curr: 1 //重新从第 1 页开始
+          }
+          ,where: {
+              project_name: project_name
+          }
+        });
+      }
+    };
+      $('.table-reload-btn .layui-btn').on('click', function(){
+      var type = $(this).data('type');
+      active[type] ? active[type].call(this) : '';
+    });
+
+
+});
+
+/*
+$('#add_project').on('click', function () {
+    layer.open({
+        type: 1,
+        title: ['添加项目'],
+        area: ['500px', '600px'],
+        content: $('#add-project-ifame'),
+    })
+
+});
+*/
+
+layui.config({
+    base: '/static/' //静态资源所在路径
+      ,debug: false
+  }).extend({
+    index: 'lib/index' //主入口模块
+  }).use(['index', 'useradmin', 'form', 'table'], function () {
+    var $ = layui.$,
+     admin = layui.admin,
+     table = layui.table,
+     form = layui.form;
+
+    var active = {
+        "add_project": function () {
+            layer.open({
+            type: 2,
+            title: ['添加项目'],
+            area: ['500px', '750px'],
+            content: '/projects/add/',
+            btn: ['确定', '取消'],
+            btnAlign: 'c',
+            yes: function (index, layero) {
+                var iframeWindow = window['layui-layer-iframe'+ index]
+                ,submit = layero.find('iframe').contents().find('#project-add-submit');
+                //console.log(" add user submit", iframeWindow);
+                //监听提交
+                iframeWindow.layui.form.on('submit(project-add-submit)', function(data){
+                    var field = data.field; //获取提交的字段
+                    var msg_obj = {
+                        'business': '业务组不能为空',
+                        'owner_a': '负责人A不能为空',
+                        'owner_b': '负责人B不能为空',
+                        'role_name': '所属部门不能为空',
+                        'dev_group': '开发部门不能为空',
+                        'test_group': '测试部门不能为空',
+                    };
+
+                    for (i in msg_obj) {
+                        if (field[i] === "default" && field.sre_env === "True") {
+                            //console.log(msg_obj[i]);
+                            layer.msg(msg_obj[i],{icon: 5, offset: 100});
+                            return;
+                        }
+                    }
+                    //console.log('start ajax');
+                       $.ajax({
+                            url: "/projects/add/",
+                            type: 'post',
+                            data: field,
+                        }).done(function (res) {
+                            if(res.code===0){
+                                  layer.close(index);
+                                  layer.msg(res.msg,{icon:1, time:2000, offset: 100}, function () {
+                                      table.reload('project_table');
+                                  });
+                              }else{
+                                  layer.msg(res.msg,{icon:5, offset: 100},function(){
+                                    return;
+                                  });
+                              }
+                       });
+            });
+            submit.trigger('click');
+            }
+        })
+        }
+    };
+
+    $('#add_project').on('click', function(){
+      var type = $(this).data('type');
+      active[type] ? active[type].call(this) : '';
+    });
+
+
+});
+
+
+</script>
+{% endblock %}

@@ -1,0 +1,10 @@
+venv
+*.pyc
+*.log
+*.pid
+venv/*
+/venv
+logs/
+upload/
+.idea/
+collected_static/

@@ -2,7 +2,7 @@
 #uwsgi need C complier,such as gcc,g++,also python-devel
 uwsgi==2.0.15
 setuptools==40.8.0
-pip==19.0.3
+pip==19.2
 
 #app
 django==1.11

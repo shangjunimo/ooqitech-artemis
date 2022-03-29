@@ -12,7 +12,7 @@ celery==3.1.25
 django-mail-templated==2.6.5
 pycrypto==2.6.1
 django-celery==3.2.2
-paramiko==2.4.2
+paramiko==2.10.1
 
 pika==1.0.1
 celery-message-consumer==1.1.1
